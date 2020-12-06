@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>克里金 kriging-wasm 示例</title>
+    <link
+      href="https://cdn.bootcdn.net/ajax/libs/openlayers/4.6.5/ol.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.bootcdn.net/ajax/libs/openlayers/4.6.5/ol.js"></script>
+    <script src="./wasm_exec.js"></script>
+    <script src="./../data/data.js"></script>
+    <script src="./../data/yn.js"></script>
+    <style>
+      #map {
+        height: 100%;
+        width: 100%;
+        position: relative;
+      }
+      .button-group {
+        right: 10px;
+        top: 10px;
+        position: absolute;
+        z-index: 10;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map" class="map">
+      <div class="button-group">
+        <button
+          class="button"
+          id="showKrigingVector"
+          onclick="showKrigingVector()"
+        >
+          克里金插值
+        </button>
+        <!-- <button class="button" onclick="showKrigingImage()">
+          克里金图像(Image)
+        </button> -->
+      </div>
+    </div>
+    <!-- <script>
+      const go = new Go();
+      WebAssembly.instantiateStreaming(
+        fetch("./main.wasm"),
+        go.importObject
+      ).then((result) => {
+        console.log("result: ", result);
+        go.run(result.instance);
+      });
+    </script> -->
+    <!-- <script type="text/javascript">
+      async function run(fileUrl) {
+        try {
+          const file = await fetch(fileUrl);
+          const buffer = await file.arrayBuffer();
+          const go = new Go();
+          const result = await WebAssembly.instantiate(buffer, go.importObject);
+          console.log("result: ", result);
+          const { instance } = result;
+          go.run(instance);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+      setTimeout(() => run("./main.wasm"));
+    </script> -->
+    <script src="./index.js"></script>
+  </body>
+</html>
