@@ -121,34 +121,34 @@ function showKrigingVector() {
         buffer,
         go.importObject
       );
-      // console.log("go.importObject: ", go.importObject);
       go.run(instance);
-      // console.time("插值总耗时");
-      // const gridrResult = RunOrdinaryKriging(
-      //   t,
-      //   x,
-      //   y,
-      //   params.krigingModel,
-      //   params.krigingSigma2,
-      //   params.krigingAlpha,
-      //   JSON.stringify(YN)
-      // );
-      // console.timeEnd("插值总耗时");
-      // console.log("gridrResult: ", gridrResult);
 
-      console.time("训练模型耗时");
-      const variogram = RunOrdinaryKrigingTrain(
+      console.time("训练模型加插值总耗时");
+      const gridrResult = RunOrdinaryKriging(
         t,
         x,
         y,
         params.krigingModel,
         params.krigingSigma2,
-        params.krigingAlpha
+        params.krigingAlpha,
+        JSON.stringify(YN)
       );
-      console.timeEnd("训练模型耗时");
-      console.log("variogramResult: ", variogram);
+      console.timeEnd("训练模型加插值总耗时");
+      console.log("gridrResult: ", gridrResult);
 
-      // console.time("插值总耗时2");
+      // console.time("训练模型耗时");
+      // const variogram = RunOrdinaryKrigingTrain(
+      //   t,
+      //   x,
+      //   y,
+      //   params.krigingModel,
+      //   params.krigingSigma2,
+      //   params.krigingAlpha
+      // );
+      // console.timeEnd("训练模型耗时");
+      // console.log("variogramResult: ", variogram);
+
+      // console.time("训练模型加插值总耗时2");
       // const gridrResult2 = RunOrdinaryKriging(
       //   t,
       //   x,
@@ -158,7 +158,7 @@ function showKrigingVector() {
       //   params.krigingAlpha,
       //   JSON.stringify(YN)
       // );
-      // console.timeEnd("插值总耗时2");
+      // console.timeEnd("训练模型加插值总耗时2");
     } catch (err) {
       console.error(err);
     } finally {
