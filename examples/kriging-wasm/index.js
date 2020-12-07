@@ -28,6 +28,20 @@ let baseLayer = new ol.layer.Tile({
 let ptlayer = new ol.layer.Vector({
   source: new ol.source.Vector(),
   zIndex: 4,
+  style: function (feature) {
+    return new ol.style.Style({
+      image: new ol.style.Circle({
+        radius: 5,
+        fill: new ol.style.Fill({ color: "rgba(255, 255, 255, 0)" }),
+        stroke: new ol.style.Stroke({ color: "#319FD3", width: 1 }),
+      }),
+      text: new ol.style.Text({
+        scale: 0.7,
+        textBaseline: "bottom",
+        text: String(feature.get("vaule")),
+      }),
+    });
+  },
 });
 //生成 GeoJson 数据
 let dataset = {
@@ -87,11 +101,18 @@ let krigingVectorLayer = new ol.layer.Vector({
 });
 map.addLayer(krigingVectorLayer);
 
+//克里金栅格等值面图层
+let krigingCanvasLayer = new ol.layer.Image({
+  zIndex: 2,
+});
+//向map添加图层
+map.addLayer(krigingCanvasLayer);
+
 // 生成 训练 数据
 const t = [];
 const x = [];
 const y = [];
-const features = dataset.features;
+const features = dataset.features.slice();
 for (let i = 0; i < features.length; i++) {
   t.push(features[i].properties.vaule); // 权重值
   x.push(features[i].geometry.coordinates[0]); // x
@@ -110,7 +131,6 @@ function showKrigingVector() {
   }
   btn.innerHTML = "插值中 打开控制台查看最终输出数据";
   isRunKriging = true;
-  const polygon = YN.features[0].geometry.coordinates;
 
   const run = async function (fileUrl) {
     try {
@@ -134,7 +154,7 @@ function showKrigingVector() {
         JSON.stringify(YN)
       );
       console.timeEnd("训练模型加插值总耗时");
-      console.log("gridrResult: ", gridrResult);
+      console.log("gridrResult: ", JSON.parse(gridrResult));
 
       // console.time("训练模型耗时");
       // const variogram = RunOrdinaryKrigingTrain(
@@ -146,7 +166,7 @@ function showKrigingVector() {
       //   params.krigingAlpha
       // );
       // console.timeEnd("训练模型耗时");
-      // console.log("variogramResult: ", variogram);
+      // console.log("variogramResult: ", JSON.parse(variogram));
 
       // console.time("训练模型加插值总耗时2");
       // const gridrResult2 = RunOrdinaryKriging(

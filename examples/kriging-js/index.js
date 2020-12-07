@@ -28,6 +28,20 @@ let baseLayer = new ol.layer.Tile({
 let ptlayer = new ol.layer.Vector({
   source: new ol.source.Vector(),
   zIndex: 4,
+  style: function (feature) {
+    return new ol.style.Style({
+      image: new ol.style.Circle({
+        radius: 5,
+        fill: new ol.style.Fill({ color: "rgba(255, 255, 255, 0)" }),
+        stroke: new ol.style.Stroke({ color: "#319FD3", width: 1 }),
+      }),
+      text: new ol.style.Text({
+        scale: 0.7,
+        textBaseline: "bottom",
+        text: String(feature.get("vaule")),
+      }),
+    });
+  },
 });
 //生成 GeoJson 数据
 let dataset = {
@@ -87,10 +101,12 @@ let krigingVectorLayer = new ol.layer.Vector({
 });
 map.addLayer(krigingVectorLayer);
 
-//克里金栅格等值面
+//克里金栅格等值面图层
 let krigingCanvasLayer = new ol.layer.Image({
   zIndex: 2,
 });
+//向map添加图层
+map.addLayer(krigingCanvasLayer);
 
 // 生成 训练 数据
 const t = [];
@@ -106,9 +122,6 @@ console.log(x);
 console.log(y);
 console.log(t);
 
-//向map添加图层
-map.addLayer(krigingCanvasLayer);
-
 let isRunKriging = false;
 const btn = document.getElementById("showKrigingVector");
 //生成矢量等值面
@@ -120,7 +133,7 @@ function showKrigingVector() {
   isRunKriging = true;
   const polygon = YN.features[0].geometry.coordinates;
 
-  const run = function run() {
+  const run = function () {
     console.time("训练模型加插值总耗时");
     console.time("训练模型耗时");
     const variogram = kriging.train(

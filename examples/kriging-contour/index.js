@@ -1,0 +1,189 @@
+let params = {
+  mapCenter: [100.87, 26.9],
+  maxValue: 100,
+  krigingModel: "exponential", //'exponential','gaussian','spherical'
+  krigingSigma2: 0,
+  krigingAlpha: 100,
+  canvasAlpha: 0.9,
+  colors: [
+    "#006837",
+    "#1a9850",
+    "#66bd63",
+    "#a6d96a",
+    "#d9ef8b",
+    "#ffffbf",
+    "#fee08b",
+    "#fdae61",
+    "#f46d43",
+    "#d73027",
+    "#a50026",
+  ],
+};
+//osm底图
+let baseLayer = new ol.layer.Tile({
+  source: new ol.source.OSM(),
+});
+
+//测试点图层
+let ptlayer = new ol.layer.Vector({
+  source: new ol.source.Vector(),
+  zIndex: 4,
+  style: function (feature) {
+    return new ol.style.Style({
+      image: new ol.style.Circle({
+        radius: 5,
+        fill: new ol.style.Fill({ color: "rgba(255, 255, 255, 0)" }),
+        stroke: new ol.style.Stroke({ color: "#319FD3", width: 1 }),
+      }),
+      text: new ol.style.Text({
+        scale: 0.7,
+        textBaseline: "bottom",
+        text: String(feature.get("vaule")),
+      }),
+    });
+  },
+});
+//生成 GeoJson 数据
+let dataset = {
+  type: "FeatureCollection",
+  features: [],
+};
+for (let i = 0; i < DATA.length; i++) {
+  let feature = {
+    type: "Feature",
+    properties: {
+      vaule: DATA[i].TEM_Avg,
+    },
+    geometry: {
+      type: "Point",
+      coordinates: [DATA[i].Lon, DATA[i].Lat],
+    },
+  };
+  dataset.features.push(feature);
+}
+let format = new ol.format.GeoJSON();
+ptlayer.getSource().addFeatures(format.readFeatures(dataset));
+
+// 地图容器初始化
+let map = new ol.Map({
+  target: "map",
+  layers: [baseLayer, ptlayer],
+  view: new ol.View({
+    center: params.mapCenter,
+    projection: "EPSG:4326",
+    zoom: 8,
+  }),
+});
+
+//克里金矢量等值面图层
+let krigingVectorSource = new ol.source.Vector();
+let krigingVectorLayer = new ol.layer.Vector({
+  source: krigingVectorSource,
+  zIndex: 3,
+  style: function (feature, res) {
+    //获取等值面分级的权重值
+    let _value = feature.get("contour_value");
+    //根据权重值，计算所在颜色渲染的区间
+    let level = parseInt(_value) / 10;
+    let color = params.colors[level];
+
+    let style = new ol.style.Style({
+      fill: new ol.style.Fill({
+        color: color,
+      }),
+      stroke: new ol.style.Stroke({
+        color: color,
+        width: 3,
+      }),
+    });
+    return [style];
+  },
+});
+map.addLayer(krigingVectorLayer);
+
+//克里金栅格等值面图层
+let krigingCanvasLayer = new ol.layer.Image({
+  zIndex: 2,
+});
+//向map添加图层
+map.addLayer(krigingCanvasLayer);
+
+let isRunKriging = false;
+const btn_showKrigingVector = document.getElementById("showKrigingVector");
+
+//生成矢量等值面并渲染
+function showKrigingVector() {
+  if (isRunKriging) {
+    return;
+  }
+  btn_showKrigingVector.innerHTML = "插值中";
+  isRunKriging = true;
+
+  krigingCanvasLayer.setVisible(false);
+  krigingVectorSource.clear();
+  krigingVectorLayer.setVisible(true);
+
+  // 生成克里金矢量等值面;
+  let kriging_contours = window["kriging-contour"].getVectorContour(
+    dataset,
+    "vaule",
+    {
+      model: "exponential",
+      sigma2: 0,
+      alpha: 100,
+    },
+    [-10, -8, -5, -3, -1, 0, 1, 3, 5, 10, 15]
+  );
+
+  let features = format.readFeatures(kriging_contours);
+  krigingVectorSource.addFeatures(features);
+
+  isRunKriging = false;
+  btn_showKrigingVector.innerHTML = "克里金插值";
+}
+
+const btn_showKrigingImage = document.getElementById("showKrigingImage");
+function showKrigingImage() {
+  if (isRunKriging) {
+    return;
+  }
+  btn_showKrigingImage.innerHTML = "插值中";
+  isRunKriging = true;
+
+  krigingVectorLayer.setVisible(false);
+
+  let imageSource = new ol.source.ImageCanvas({
+    canvasFunction: (extent, resolution, pixelRatio, size, projection) => {
+      let canvas = document.createElement("canvas");
+      canvas.width = size[0];
+      canvas.height = size[1];
+      canvas.style.display = "block";
+      //设置canvas透明度
+      canvas.getContext("2d").globalAlpha = params.canvasAlpha;
+
+      // 使用分层设色渲染
+      window["kriging-contour"].drawCanvasContour(
+        dataset,
+        "vaule",
+        {
+          model: "exponential",
+          sigma2: 0,
+          alpha: 100,
+        },
+        canvas,
+        [extent[0], extent[2]],
+        [extent[1], extent[3]],
+        params.colors
+      );
+
+      return canvas;
+    },
+    projection: "EPSG:4326",
+  });
+
+  krigingCanvasLayer.setSource(imageSource);
+  krigingCanvasLayer.setVisible(true);
+
+  isRunKriging = false;
+  btn_showKrigingImage.innerHTML = "克里金插值";
+}
