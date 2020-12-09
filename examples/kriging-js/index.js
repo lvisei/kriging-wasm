@@ -1,7 +1,7 @@
 let params = {
   mapCenter: [100.87, 26.9],
   maxValue: 100,
-  krigingModel: "exponential", //'exponential','gaussian','spherical'
+  krigingModel: "spherical", //'spherical','gaussian','spherical'
   krigingSigma2: 0,
   krigingAlpha: 100,
   canvasAlpha: 0.9,
@@ -112,7 +112,7 @@ map.addLayer(krigingCanvasLayer);
 const t = [];
 const x = [];
 const y = [];
-const features = dataset.features;
+const features = dataset.features.slice();
 for (let i = 0; i < features.length; i++) {
   t.push(features[i].properties.vaule); // 权重值
   x.push(features[i].geometry.coordinates[0]); // x

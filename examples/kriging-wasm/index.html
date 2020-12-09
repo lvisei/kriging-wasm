@@ -43,29 +43,30 @@
     <!-- <script>
       const go = new Go();
       WebAssembly.instantiateStreaming(
-        fetch("./main.wasm"),
+        fetch("./kriging.wasm"),
         go.importObject
       ).then((result) => {
         console.log("result: ", result);
         go.run(result.instance);
       });
     </script> -->
-    <!-- <script type="text/javascript">
-      async function run(fileUrl) {
+    <script>
+      const run = async function (fileUrl) {
         try {
           const file = await fetch(fileUrl);
           const buffer = await file.arrayBuffer();
           const go = new Go();
-          const result = await WebAssembly.instantiate(buffer, go.importObject);
-          console.log("result: ", result);
-          const { instance } = result;
+          const { instance } = await WebAssembly.instantiate(
+            buffer,
+            go.importObject
+          );
           go.run(instance);
         } catch (err) {
           console.error(err);
         }
-      }
-      setTimeout(() => run("./main.wasm"));
-    </script> -->
+      };
+      setTimeout(() => run("./kriging.wasm"));
+    </script>
     <script src="./index.js"></script>
   </body>
 </html>

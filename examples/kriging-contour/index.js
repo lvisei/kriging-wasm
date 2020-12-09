@@ -1,7 +1,7 @@
 let params = {
   mapCenter: [100.87, 26.9],
   maxValue: 100,
-  krigingModel: "exponential", //'exponential','gaussian','spherical'
+  krigingModel: "spherical", //'exponential','gaussian','spherical'
   krigingSigma2: 0,
   krigingAlpha: 100,
   canvasAlpha: 0.9,

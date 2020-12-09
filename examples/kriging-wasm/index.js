@@ -1,7 +1,7 @@
 let params = {
   mapCenter: [100.87, 26.9],
   maxValue: 100,
-  krigingModel: "exponential", //'exponential','gaussian','spherical'
+  krigingModel: "spherical", //'exponential','gaussian','spherical'
   krigingSigma2: 0,
   krigingAlpha: 100,
   canvasAlpha: 0.9,
@@ -131,62 +131,49 @@ function showKrigingVector() {
   }
   btn.innerHTML = "插值中 打开控制台查看最终输出数据";
   isRunKriging = true;
+  const geometry = YN.features[0].geometry;
 
-  const run = async function (fileUrl) {
-    try {
-      const file = await fetch(fileUrl);
-      const buffer = await file.arrayBuffer();
-      const go = new Go();
-      const { instance } = await WebAssembly.instantiate(
-        buffer,
-        go.importObject
-      );
-      go.run(instance);
+  const run = function (fileUrl) {
+    console.time("训练模型加插值总耗时");
+    // const gridrResult = RunOrdinaryKriging(
+    //   t,
+    //   x,
+    //   y,
+    //   params.krigingModel,
+    //   params.krigingSigma2,
+    //   params.krigingAlpha,
+    //   JSON.stringify(geometry)
+    // );
+    // console.timeEnd("训练模型加插值总耗时");
+    // console.log("gridrResult: ", JSON.parse(gridrResult));
 
-      console.time("训练模型加插值总耗时");
-      const gridrResult = RunOrdinaryKriging(
-        t,
-        x,
-        y,
-        params.krigingModel,
-        params.krigingSigma2,
-        params.krigingAlpha,
-        JSON.stringify(YN)
-      );
-      console.timeEnd("训练模型加插值总耗时");
-      console.log("gridrResult: ", JSON.parse(gridrResult));
+    console.time("训练模型耗时");
+    const variogram = RunOrdinaryKrigingTrain(
+      t,
+      x,
+      y,
+      params.krigingModel,
+      params.krigingSigma2,
+      params.krigingAlpha
+    );
+    console.timeEnd("训练模型耗时");
+    console.log("variogramResult: ", JSON.parse(variogram));
 
-      // console.time("训练模型耗时");
-      // const variogram = RunOrdinaryKrigingTrain(
-      //   t,
-      //   x,
-      //   y,
-      //   params.krigingModel,
-      //   params.krigingSigma2,
-      //   params.krigingAlpha
-      // );
-      // console.timeEnd("训练模型耗时");
-      // console.log("variogramResult: ", JSON.parse(variogram));
-
-      // console.time("训练模型加插值总耗时2");
-      // const gridrResult2 = RunOrdinaryKriging(
-      //   t,
-      //   x,
-      //   y,
-      //   params.krigingModel,
-      //   params.krigingSigma2,
-      //   params.krigingAlpha,
-      //   JSON.stringify(YN)
-      // );
-      // console.timeEnd("训练模型加插值总耗时2");
-    } catch (err) {
-      console.error(err);
-    } finally {
-      isRunKriging = false;
-      btn.innerHTML = "克里金插值";
-    }
+    // console.time("训练模型加插值总耗时2");
+    // const gridrResult2 = RunOrdinaryKriging(
+    //   t,
+    //   x,
+    //   y,
+    //   params.krigingModel,
+    //   params.krigingSigma2,
+    //   params.krigingAlpha,
+    //   JSON.stringify(polygon)
+    // );
+    // console.timeEnd("训练模型加插值总耗时2");
+    isRunKriging = false;
+    btn.innerHTML = "克里金插值";
   };
-  setTimeout(() => run("./main.wasm"));
+  setTimeout(() => run("./kriging.wasm"));
 
   // krigingCanvasLayer.setVisible(false);
   // krigingVectorSource.clear();
