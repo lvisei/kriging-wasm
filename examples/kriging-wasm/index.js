@@ -4,6 +4,7 @@ let params = {
   krigingModel: "spherical", //'exponential','gaussian','spherical'
   krigingSigma2: 0,
   krigingAlpha: 100,
+  krigingWidth: 0.01,
   canvasAlpha: 0.9,
   colors: [
     "#006837",
@@ -134,42 +135,42 @@ function showKrigingVector() {
   const geometry = YN.features[0].geometry;
 
   const run = function (fileUrl) {
-    console.time("训练模型加插值总耗时");
-    // const gridrResult = RunOrdinaryKriging(
+    // console.time("训练模型耗时");
+    // const variogram = OrdinaryKrigingTrain(
     //   t,
     //   x,
     //   y,
     //   params.krigingModel,
     //   params.krigingSigma2,
-    //   params.krigingAlpha,
-    //   JSON.stringify(geometry)
+    //   params.krigingAlpha
     // );
-    // console.timeEnd("训练模型加插值总耗时");
-    // console.log("gridrResult: ", JSON.parse(gridrResult));
+    // console.timeEnd("训练模型耗时");
+    // console.log("variogramResult: ", JSON.parse(variogram));
 
-    console.time("训练模型耗时");
-    const variogram = RunOrdinaryKrigingTrain(
+    console.time("训练模型加插值总耗时");
+    const gridrResult = OrdinaryKriging(
       t,
       x,
       y,
       params.krigingModel,
       params.krigingSigma2,
-      params.krigingAlpha
+      params.krigingAlpha,
+      params.krigingWidth,
+      JSON.stringify(geometry)
     );
-    console.timeEnd("训练模型耗时");
-    console.log("variogramResult: ", JSON.parse(variogram));
+    console.timeEnd("训练模型加插值总耗时");
+    console.log("gridrResult: ", gridrResult);
 
-    // console.time("训练模型加插值总耗时2");
-    // const gridrResult2 = RunOrdinaryKriging(
-    //   t,
-    //   x,
-    //   y,
-    //   params.krigingModel,
-    //   params.krigingSigma2,
-    //   params.krigingAlpha,
-    //   JSON.stringify(polygon)
-    // );
-    // console.timeEnd("训练模型加插值总耗时2");
+    // const worker = new Worker("work.js");
+
+    // worker.onmessage = function (event) {
+    //   console.log("Received message " + event.data);
+    //   console.timeEnd("训练模型加插值总耗时");
+    //   worker.terminate();
+    // };
+
+    // worker.postMessage({ method: "start", args: [] });
+
     isRunKriging = false;
     btn.innerHTML = "克里金插值";
   };
@@ -178,19 +179,7 @@ function showKrigingVector() {
   // krigingCanvasLayer.setVisible(false);
   // krigingVectorSource.clear();
   // krigingVectorLayer.setVisible(true);
-
   //生成克里金矢量等值面
-  // let kriging_contours = getVectorContour(
-  //   dataset,
-  //   "level",
-  //   {
-  //     model: "exponential",
-  //     sigma2: 0,
-  //     alpha: 100,
-  //   },
-  //   [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-  // );
-
   // let features = format.readFeatures(kriging_contours);
   // krigingVectorSource.addFeatures(features);
 }
@@ -209,7 +198,7 @@ function showKrigingVector() {
 //       canvas.getContext("2d").globalAlpha = params.canvasAlpha;
 
 //       //使用分层设色渲染
-//       drawCanvasContour(
+//       drawCanvasXXXX(
 //         dataset,
 //         "level",
 //         {

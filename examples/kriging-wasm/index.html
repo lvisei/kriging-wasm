@@ -61,11 +61,12 @@
             go.importObject
           );
           go.run(instance);
+          console.log("instance: ", instance);
         } catch (err) {
           console.error(err);
         }
       };
-      setTimeout(() => run("./kriging.wasm"));
+      run("./kriging.wasm");
     </script>
     <script src="./index.js"></script>
   </body>
